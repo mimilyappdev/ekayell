@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ekayell!（イーカエール）｜同じ表現を見つけて、言い換える</title>
+<meta name="description" content="小説の原稿を貼るだけで、頻出表現・語尾の連続・繰り返しフレーズを検出して言い換え候補を提案。登録不要・無料・原稿はどこにも送信されません。">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --green:#3d8b5f; --green-dark:#2d6847; --green-pale:#e8f4ec; --ink:#2b3230; --muted:#6b7a72; --bg:#f4f8f5; --card:#ffffff; --accent:#e8734a; }
+  body { font-family:"Yu Gothic UI","Hiragino Sans","Noto Sans JP",sans-serif; background:var(--bg); color:var(--ink); line-height:1.7; }
+  .wrap { max-width:820px; margin:0 auto; padding:20px 16px 80px; }
+  header { text-align:center; padding:28px 0 10px; }
+  header h1 { font-size:26px; color:var(--green-dark); letter-spacing:1px; }
+  header .tag { color:var(--muted); font-size:13px; margin-top:6px; }
+  .pipeline { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; align-items:center; margin:16px 0 8px; font-size:11px; color:var(--muted); }
+  .pipeline span, .pipeline a { padding:4px 10px; border-radius:14px; background:#eceff0; color:#8a938e; text-decoration:none; white-space:nowrap; }
+  .pipeline a { background:var(--green-pale); color:var(--green-dark); font-weight:bold; }
+  .pipeline .here { background:var(--green); color:#fff; font-weight:bold; }
+  .pipeline .arrow { background:none; padding:0 2px; }
+  .privacy { text-align:center; font-size:12px; color:var(--green-dark); background:var(--green-pale); border-radius:8px; padding:8px 12px; margin:10px 0 20px; }
+  .panel { background:var(--card); border-radius:14px; padding:18px; box-shadow:0 2px 8px rgba(45,104,71,.08); margin-bottom:18px; }
+  textarea { width:100%; min-height:220px; border:2px solid #d5e5da; border-radius:10px; padding:14px; font-size:15px; line-height:1.9; font-family:inherit; resize:vertical; }
+  textarea:focus { outline:none; border-color:var(--green); }
+  .toolbar { display:flex; gap:10px; align-items:center; margin-top:12px; flex-wrap:wrap; }
+  .btn { border:none; border-radius:10px; padding:12px 28px; font-size:15px; font-weight:bold; cursor:pointer; font-family:inherit; }
+  .btn-main { background:var(--green); color:#fff; flex:1; min-width:160px; }
+  .btn-main:active { background:var(--green-dark); }
+  .btn-sub { background:#eef2ef; color:var(--muted); font-size:13px; padding:12px 16px; }
+  .charcount { font-size:12px; color:var(--muted); margin-left:auto; }
+  h2 { font-size:16px; color:var(--green-dark); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:4px; }
+  .stat { background:var(--green-pale); border-radius:10px; padding:10px; text-align:center; }
+  .stat .v { font-size:22px; font-weight:bold; color:var(--green-dark); }
+  .stat .l { font-size:11px; color:var(--muted); }
+  .freq-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; cursor:pointer; border:1px solid transparent; }
+  .freq-item:hover { background:var(--green-pale); }
+  .freq-item.open { background:var(--green-pale); border-color:var(--green); }
+  .freq-word { font-weight:bold; font-size:15px; }
+  .freq-count { margin-left:auto; background:var(--accent); color:#fff; font-size:12px; font-weight:bold; border-radius:12px; padding:2px 10px; }
+  .freq-count.mid { background:#e8a04a; }
+  .freq-count.low { background:#9db8a8; }
+  .alt-panel { background:#fbfdfb; border:1px solid #d5e5da; border-radius:10px; padding:12px 14px; margin:4px 0 10px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0; }
+  .chip { background:#fff; border:1.5px solid var(--green); color:var(--green-dark); border-radius:16px; padding:5px 14px; font-size:13px; cursor:pointer; user-select:none; }
+  .chip:active { background:var(--green); color:#fff; }
+  .chip-hint { font-size:11px; color:var(--muted); }
+  .occur { font-size:12px; color:var(--muted); line-height:2; margin-top:6px; border-top:1px dashed #d5e5da; padding-top:6px; }
+  .occur mark { background:#ffe3a3; border-radius:3px; padding:0 2px; }
+  .extlink { font-size:12px; margin-top:6px; display:inline-block; color:var(--green-dark); }
+  .endbar { display:flex; height:22px; border-radius:6px; overflow:hidden; margin:8px 0; }
+  .endbar div { min-width:2px; }
+  .legend { display:flex; flex-wrap:wrap; gap:12px; font-size:11px; color:var(--muted); margin-bottom:10px; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; }
+  .run-item { background:#fdf3ee; border-left:3px solid var(--accent); border-radius:6px; padding:8px 12px; font-size:13px; margin-bottom:8px; }
+  .run-item .quote { color:var(--muted); font-size:12px; }
+  .advice { background:var(--green-pale); border-radius:8px; padding:10px 12px; font-size:13px; margin-top:8px; }
+  .ngram-item { display:flex; align-items:center; padding:7px 12px; border-radius:8px; font-size:14px; }
+  .ngram-item:nth-child(odd) { background:#f7faf8; }
+  .empty { color:var(--muted); font-size:13px; padding:8px 0; }
+  .dict-search { width:100%; border:2px solid #d5e5da; border-radius:10px; padding:10px 14px; font-size:14px; font-family:inherit; margin-bottom:10px; }
+  .dict-search:focus { outline:none; border-color:var(--green); }
+  .dict-row { padding:10px 4px; border-bottom:1px dashed #e0eae3; }
+  .dict-row b { color:var(--green-dark); }
+  footer { text-align:center; font-size:11px; color:var(--muted); margin-top:30px; line-height:2; }
+  footer a { color:var(--green-dark); }
+  .tabs { display:flex; gap:8px; margin-bottom:14px; }
+  .tabbtn { flex:1; border:2px solid #d5e5da; background:#fff; color:var(--muted); border-radius:12px; padding:12px 8px; font-size:14px; font-weight:bold; cursor:pointer; font-family:inherit; }
+  .tabbtn.active { background:var(--green); border-color:var(--green); color:#fff; }
+  .gd-label { font-size:11px; color:var(--muted); background:#eef2ef; border-radius:10px; padding:2px 8px; margin-left:6px; }
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 24px; border-radius:24px; font-size:13px; opacity:0; transition:opacity .25s; pointer-events:none; }
+  .toast.show { opacity:1; }
+  #results { display:none; }
+  @media (max-width:520px){ header h1{font-size:21px;} .btn-main{width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Ekayell!</h1>
+  <p class="tag">「同じ表現ばっかり…」を見つけて、言い換える。小説原稿の表現チェック＆言い換えツール</p>
+</header>
+
+<div class="pipeline">
+  <span>💡 アイデア</span><span class="arrow">→</span>
+  <span id="pl-kishotenketsu">起承転結ーる</span><span class="arrow">→</span>
+  <span>✍️ 執筆</span><span class="arrow">→</span>
+  <span class="here">Ekayell!</span><span class="arrow">→</span>
+  <a href="https://mimilyappdev.github.io/kouseieasy/" target="_blank">KouseiEasy</a><span class="arrow">→</span>
+  <a href="https://mimilyappdev.github.io/rakunovel/" target="_blank">RakuNovel</a>
+</div>
+
+<p class="privacy">🔒 入力した単語も原稿もブラウザの中だけで処理されます。どこにも送信・保存されません。</p>
+
+<div class="tabs">
+  <button class="tabbtn active" data-tab="tab-word">🔍 単語をしらべる</button>
+  <button class="tabbtn" data-tab="tab-doc">📄 原稿まるごとチェック</button>
+</div>
+
+<div id="tab-word" class="tabview">
+  <div class="panel">
+    <h2>📖 言い換えをさがす</h2>
+    <input class="dict-search" id="dictSearch" placeholder="例：見る、とても、嬉しい、心臓…">
+    <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">創作向けの手作り辞書 ＋ 汎用辞書（約7万語・初回検索時に読み込み）から探します。候補タップでコピー。</p>
+    <div id="dictList"></div>
+  </div>
+</div>
+
+<div id="tab-doc" class="tabview" style="display:none">
+<div class="panel">
+  <textarea id="src" placeholder="ここに原稿を貼り付けてください（章単位がおすすめ）"></textarea>
+  <div class="toolbar">
+    <button class="btn btn-main" id="analyzeBtn">🔍 表現をチェックする</button>
+    <button class="btn btn-sub" id="sampleBtn">サンプルで試す</button>
+    <span class="charcount" id="charcount">0字</span>
+  </div>
+</div>
+
+<div id="results">
+  <div class="panel">
+    <h2>📊 ざっくり診断</h2>
+    <div class="cards" id="statCards"></div>
+  </div>
+
+  <div class="panel">
+    <h2>🔁 よく出てくる表現 <span style="font-size:11px;color:var(--muted);font-weight:normal;">クリックで言い換え候補（候補タップでコピー）</span></h2>
+    <div id="freqList"></div>
+  </div>
+
+  <div class="panel">
+    <h2>📝 語尾のリズム</h2>
+    <div class="legend" id="endLegend"></div>
+    <div class="endbar" id="endBar"></div>
+    <div id="endRuns"></div>
+  </div>
+
+  <div class="panel">
+    <h2>🔂 繰り返しフレーズ</h2>
+    <div id="ngramList"></div>
+  </div>
+</div>
+</div><!-- /tab-doc -->
+
+<footer>
+  本ツールの提案はあくまで候補です。作品の文体・ニュアンスに合わせてお選びください。<br>
+  Ekayell!（イーカエール）by <a href="https://mimilyappdev.github.io/" target="_blank">Mimily</a> ｜ 姉妹ツール：<a href="https://mimilyappdev.github.io/kouseieasy/" target="_blank">KouseiEasy</a>・<a href="https://mimilyappdev.github.io/rakunovel/" target="_blank">RakuNovel</a>｜ 汎用辞書：SudachiDict synonyms（Apache License 2.0）
+</footer>
+</div>
+<div class="toast" id="toast">コピーしました</div>
+
+<script id="core">
+/* ============ 言い換え辞書（創作頻出語・手作り） ============ */
+const DICT = [
+ // 動作（pat=活用を拾う正規表現）
+ {key:"見る", pat:"見[るたて]", alts:["見つめる","眺める","視線を向ける","目をやる","目を凝らす","見やる","一瞥する","覗き込む"], note:"視線の強さ・時間で使い分け"},
+ {key:"思う", pat:"思[うっいわえ]", alts:["感じる","考える","気がする","頭をよぎる","胸に浮かぶ","思案する","確信する"], note:"地の文の「思った」連発に"},
+ {key:"言う", pat:"言[うっいわえ]", alts:["口にする","告げる","呟く","漏らす","返す","切り出す","囁く","問いかける"], note:"会話の前後の「言った」に"},
+ {key:"聞く", pat:"聞[くいこけ]", alts:["耳にする","耳を傾ける","聞き入る","尋ねる","耳を澄ます"]},
+ {key:"笑う", pat:"笑[うっいわみ]", alts:["微笑む","口元を緩める","目を細める","くすりと笑う","破顔する","苦笑する","噴き出す"], note:"笑いの種類（照れ・嘲笑・爆笑）で選ぶ"},
+ {key:"泣く", pat:"泣[くいきけ]", alts:["涙をこぼす","嗚咽を漏らす","目頭が熱くなる","むせび泣く","涙が頬を伝う"]},
+ {key:"歩く", pat:"歩[くいきけ]", alts:["歩を進める","足を運ぶ","歩み寄る","ゆっくりと進む","闊歩する"]},
+ {key:"走る", pat:"走[るっり]", alts:["駆ける","駆け出す","疾走する","飛び出す","足を速める"]},
+ {key:"行く", pat:"行[くっき]", alts:["向かう","足を向ける","赴く","出向く"]},
+ {key:"持つ", pat:"持[つっち]", alts:["握る","掴む","抱える","携える","手にする"]},
+ {key:"触れる", pat:"触れ", alts:["撫でる","なぞる","指を這わせる","そっと重ねる","掠める"]},
+ {key:"立つ", pat:"立[つっち]", alts:["立ち上がる","腰を上げる","身を起こす"]},
+ {key:"座る", pat:"座[るっり]", alts:["腰を下ろす","腰掛ける","身を沈める"]},
+ {key:"頷く", pat:"頷[くい]", alts:["首を縦に振る","首肯する","相槌を打つ"]},
+ {key:"驚く", pat:"驚[くい]", alts:["目を見開く","息を呑む","ぎょっとする","虚を衝かれる","瞠目する"]},
+ {key:"怒る", pat:"怒[るっり]", alts:["憤る","苛立つ","眉を吊り上げる","声を荒らげる"]},
+ {key:"考える", pat:"考え", alts:["思考を巡らせる","頭を捻る","思いを馳せる","黙考する"]},
+ {key:"分かる", pat:"分か[るっり]", alts:["理解する","察する","腑に落ちる","呑み込む"]},
+ {key:"感じる", pat:"感じ", alts:["覚える","抱く","察知する","肌で知る"]},
+ {key:"振り返る", pat:"振り返", alts:["顧みる","首を巡らせる","視線を戻す"]},
+ {key:"呟く", pat:"呟", alts:["独りごちる","ぽつりと言う","小さく漏らす"]},
+ // 副詞・強調（完全一致）
+ {key:"とても", alts:["非常に","ひどく","やけに","この上なく","随分と","途方もなく"], note:"そもそも削れないかも検討"},
+ {key:"すごく", alts:["たまらなく","恐ろしく","尋常でなく","ひどく"]},
+ {key:"かなり", alts:["相当","随分","少なからず","存外"]},
+ {key:"少し", alts:["わずかに","かすかに","幾分","ほんのり","心なしか"]},
+ {key:"ちょっと", alts:["束の間","軽く","ほんの少し","わずかに"]},
+ {key:"ゆっくり", alts:["緩やかに","悠然と","徐々に","時間をかけて"]},
+ {key:"突然", alts:["不意に","唐突に","出し抜けに","前触れもなく"]},
+ {key:"急に", alts:["不意に","にわかに","突として"]},
+ {key:"すぐに", alts:["直ちに","間髪を入れず","瞬く間に","程なくして"]},
+ {key:"たくさん", alts:["数多く","山ほど","夥しいほど","ふんだんに"]},
+ {key:"きっと", alts:["おそらく","十中八九","必ずや"]},
+ {key:"やっぱり", alts:["やはり","案の定","思った通り","結局のところ"]},
+ {key:"だんだん", alts:["次第に","徐々に","少しずつ","日に日に"]},
+ {key:"いつも", alts:["常に","絶えず","決まって","日頃から","例によって"]},
+ {key:"本当に", alts:["心底","実に","紛れもなく","掛け値なしに"]},
+ {key:"絶対に", alts:["断じて","何があっても","例外なく"]},
+ {key:"一瞬", alts:["刹那","束の間","瞬き一つの間"]},
+ {key:"思わず", alts:["咄嗟に","反射的に","われ知らず","図らずも"]},
+ {key:"なんだか", alts:["どことなく","なぜだか","そこはかとなく"]},
+ {key:"ふと", alts:["不意に","何の気なしに","ふいと"]},
+ {key:"やがて", alts:["ほどなく","間もなく","そのうちに"]},
+ // 感情・状態
+ {key:"嬉しい", alts:["心が弾む","胸が躍る","頬が緩む","舞い上がる"], note:"行動・身体反応に置き換えると描写になる"},
+ {key:"悲しい", alts:["胸が締め付けられる","心が沈む","やるせない","切ない","物悲しい"]},
+ {key:"怖い", alts:["恐ろしい","背筋が凍る","肝が冷える","身がすくむ","ぞっとする"]},
+ {key:"恥ずかしい", alts:["気恥ずかしい","顔から火が出る","居た堪れない","面映ゆい"]},
+ {key:"不安", alts:["心許ない","気が気でない","胸騒ぎ","落ち着かない"]},
+ {key:"好き", alts:["愛おしい","心惹かれる","焦がれる","憎からず思う"]},
+ {key:"優しい", alts:["柔らかな","慈しむような","穏やかな","労わるような"]},
+ {key:"緊張", alts:["身を硬くする","息を詰める","固唾を呑む","強張る"]},
+ // 身体反応
+ {key:"ドキドキ", alts:["鼓動が速まる","胸が高鳴る","心臓が早鐘を打つ"], note:"擬音を地の文に開くと文芸寄りに"},
+ {key:"心臓が跳ね", alts:["鼓動が跳ねる","胸が大きく脈打つ","心拍が跳ね上がる"]},
+ {key:"ため息", alts:["吐息","嘆息","息をつく","深く息を吐く"]},
+ {key:"顔が赤く", alts:["頬が染まる","顔が火照る","朱が差す","耳まで赤くなる"]},
+ {key:"目を逸ら", alts:["視線を外す","目を伏せる","顔を背ける"]},
+ {key:"首を傾げ", alts:["小首を傾げる","訝しむ","疑問符を浮かべる"]},
+ // 形容・情景
+ {key:"きれい", alts:["美しい","端正な","透き通った","見目麗しい","清らかな"]},
+ {key:"かわいい", alts:["愛らしい","愛くるしい","あどけない","可憐な"]},
+ {key:"大きな", alts:["巨大な","雄大な","広大な","がっしりした"]},
+ {key:"小さな", alts:["小ぶりな","ささやかな","華奢な","こぢんまりした"]},
+ {key:"静か", alts:["静寂に包まれた","物音ひとつしない","しんとした","穏やかな"]},
+ {key:"暗い", alts:["仄暗い","薄暗い","闇に沈んだ","陰鬱な"]},
+ {key:"明るい", alts:["眩しい","晴れやかな","煌々とした","陽気な"]},
+ {key:"温かい", alts:["温もりのある","ほのかに熱い","柔らかな熱を持った"]},
+ {key:"冷たい", alts:["冷ややかな","ひんやりした","凍てつく","よそよそしい"]},
+ {key:"美しい", alts:["麗しい","艶やかな","目を奪われるような"]},
+ {key:"きらきら", alts:["燦然と","眩く","光を纏って"]},
+ {key:"ふわふわ", alts:["柔らかく","綿のような","頼りなく浮ついて"]}
+];
+
+const END_CLASSES = [
+ {cls:"た",   color:"#e8734a", label:"〜た"},
+ {cls:"現在形", color:"#3d8b5f", label:"〜る・〜う など"},
+ {cls:"だ",   color:"#8a6bbf", label:"〜だ・〜だった"},
+ {cls:"敬体", color:"#4a90d9", label:"です・ます"},
+ {cls:"ない", color:"#c9a227", label:"〜ない"},
+ {cls:"会話", color:"#b8c4bd", label:"会話文（判定外）"},
+ {cls:"その他", color:"#7a8a80", label:"体言止め・その他"}
+];
+
+function classifyEnd(s){
+  const t = s.trim().replace(/[。！？!?…‥\s]+$/,"");
+  if(!t) return null;
+  if(/[」』]$/.test(t)) return "会話";
+  if(/(です|ます|でした|ました|ません|ましょう|ですね|ですよ)$/.test(t)) return "敬体";
+  if(/(だった|だ)$/.test(t)) return "だ";
+  if(/ない$/.test(t)) return "ない";
+  if(/た$/.test(t)) return "た";
+  if(/[るうくすつぶむぐ]$/.test(t)) return "現在形";
+  return "その他";
+}
+
+function splitSentences(text){
+  return text.split(/(?<=[。！？!?])|\n/).map(s=>s.trim()).filter(s=>s.length>0);
+}
+
+function analyzeEnds(text){
+  const sents = splitSentences(text);
+  const seq = sents.map(s=>({s, cls:classifyEnd(s)})).filter(x=>x.cls);
+  const dist = {};
+  seq.forEach(x=>{ dist[x.cls]=(dist[x.cls]||0)+1; });
+  // 連続検出（会話・その他は対象外）
+  const runs=[]; let cur=null;
+  seq.forEach((x,i)=>{
+    if(x.cls==="会話"||x.cls==="その他"){ if(cur&&cur.len>=3)runs.push(cur); cur=null; return; }
+    if(cur && cur.cls===x.cls){ cur.len++; cur.end=i; }
+    else { if(cur&&cur.len>=3)runs.push(cur); cur={cls:x.cls,len:1,start:i,end:i}; }
+  });
+  if(cur&&cur.len>=3)runs.push(cur);
+  runs.forEach(r=>{ r.preview=seq.slice(r.start,Math.min(r.start+3,r.end+1)).map(x=>x.s.slice(0,18)).join(" ／ "); });
+  return {seq, dist, runs, total:seq.length};
+}
+
+function analyzeFreq(text){
+  const out=[];
+  DICT.forEach(d=>{
+    const re = new RegExp(d.pat || d.key.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"), "g");
+    const m = text.match(re);
+    if(m && m.length>=3) out.push({key:d.key, count:m.length, dict:d, re:re.source});
+  });
+  out.sort((a,b)=>b.count-a.count);
+  return out;
+}
+
+function analyzeNgrams(text, flaggedRes){
+  const clean = text;
+  const counts = new Map();
+  for(let len=4; len<=7; len++){
+    for(let i=0; i+len<=clean.length; i++){
+      const sub = clean.substr(i,len);
+      if(!/^[ぁ-んァ-ヶ一-龠ー々]+$/.test(sub)) continue;
+      counts.set(sub,(counts.get(sub)||0)+1);
+    }
+  }
+  let cands=[...counts.entries()].filter(([s,c])=>c>=4)
+    .filter(([s])=>!/^[のにをはがとでへやもうたてない、]+$/.test(s))
+    .map(([s,c])=>({s,c}));
+  // 長い方を優先して包含される短い候補を削除
+  cands.sort((a,b)=>(b.s.length*b.c)-(a.s.length*a.c));
+  const kept=[];
+  cands.forEach(x=>{
+    if(kept.some(k=>k.s.includes(x.s) && k.c>=x.c*0.7)) return;
+    if(flaggedRes.some(re=>new RegExp(re).test(x.s))) return;
+    kept.push(x);
+  });
+  return kept.slice(0,12);
+}
+
+function findOccurrences(text, reSource, limit){
+  const re = new RegExp(reSource,"g");
+  const out=[]; let m;
+  while((m=re.exec(text)) && out.length<(limit||5)){
+    const st=Math.max(0,m.index-14), en=Math.min(text.length,m.index+m[0].length+14);
+    out.push({before:text.slice(st,m.index), hit:m[0], after:text.slice(m.index+m[0].length,en)});
+  }
+  return out;
+}
+
+function analyze(text){
+  const ends = analyzeEnds(text);
+  const freq = analyzeFreq(text);
+  const ngrams = analyzeNgrams(text, freq.map(f=>f.re));
+  return {chars:text.replace(/\s/g,"").length, ends, freq, ngrams};
+}
+if (typeof module!=="undefined") module.exports={analyze,DICT,classifyEnd,splitSentences};
+</script>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let lastText="";
+
+$("src").addEventListener("input",()=>{ $("charcount").textContent=$("src").value.replace(/\s/g,"").length.toLocaleString()+"字"; });
+
+$("sampleBtn").addEventListener("click",()=>{
+  $("src").value=`彼はとても驚いて、彼女の顔を見た。彼女は少し笑って、窓の外を見た。空はとてもきれいだった。彼は嬉しいと思った。この時間がずっと続けばいいと思った。\n「もう帰るの？」と彼女は言った。\n「まだ大丈夫」と彼は言った。心臓が跳ねた。彼はごまかすように紅茶を飲んだ。彼女はまた少し笑った。それがとても嬉しかった。彼はもう一度、彼女の顔を見た。`;
+  $("src").dispatchEvent(new Event("input"));
+});
+
+$("analyzeBtn").addEventListener("click",()=>{
+  const text=$("src").value;
+  if(text.trim().length<20){ toast("原稿を貼り付けてください（20字以上）"); return; }
+  lastText=text;
+  const r=analyze(text);
+  renderStats(r); renderFreq(r,text); renderEnds(r.ends); renderNgrams(r.ngrams);
+  $("results").style.display="block";
+  $("results").scrollIntoView({behavior:"smooth"});
+});
+
+function renderStats(r){
+  const taRatio = r.ends.total? Math.round((r.ends.dist["た"]||0)/r.ends.total*100):0;
+  $("statCards").innerHTML=`
+   <div class="stat"><div class="v">${r.chars.toLocaleString()}</div><div class="l">文字数</div></div>
+   <div class="stat"><div class="v">${r.ends.total}</div><div class="l">文の数</div></div>
+   <div class="stat"><div class="v">${taRatio}%</div><div class="l">「〜た」で終わる文</div></div>
+   <div class="stat"><div class="v">${r.freq.length+r.ngrams.length}</div><div class="l">見直し候補</div></div>`;
+}
+
+function renderFreq(r,text){
+  const el=$("freqList");
+  if(!r.freq.length){ el.innerHTML='<p class="empty">3回以上使われている頻出語は見つかりませんでした 🎉</p>'; return; }
+  el.innerHTML="";
+  r.freq.forEach((f,idx)=>{
+    const item=document.createElement("div");
+    const lv = f.count>=8?"":"mid";
+    item.className="freq-item";
+    item.innerHTML=`<span class="freq-word">${esc(f.key)}</span><span class="freq-count ${f.count>=8?'':(f.count>=5?'mid':'low')}">${f.count}回</span>`;
+    const panel=document.createElement("div");
+    panel.className="alt-panel"; panel.style.display="none";
+    const occ=findOccurrences(text,f.re,4);
+    panel.innerHTML=`
+      <div class="chip-hint">言い換え候補（タップでコピー）${f.dict.note?"　💡"+esc(f.dict.note):""}</div>
+      <div class="chips">${f.dict.alts.map(a=>`<span class="chip" data-copy="${esc(a)}">${esc(a)}</span>`).join("")}</div>
+      <div class="occur">${occ.map(o=>`…${esc(o.before)}<mark>${esc(o.hit)}</mark>${esc(o.after)}…`).join("<br>")}</div>
+      <span class="extlink gd-more" data-key="${esc(f.key)}" style="cursor:pointer;margin-right:14px;">📚 汎用辞書の候補も見る</span>
+      <a class="extlink" href="https://renso-ruigo.com/word/${encodeURIComponent(f.key)}" target="_blank">連想類語辞典で見る →</a>`;
+    item.addEventListener("click",()=>{
+      const open=panel.style.display==="block";
+      panel.style.display=open?"none":"block";
+      item.classList.toggle("open",!open);
+    });
+    el.appendChild(item); el.appendChild(panel);
+  });
+  el.addEventListener("click",async e=>{
+    if(e.target.dataset&&e.target.dataset.copy){ copy(e.target.dataset.copy); return; }
+    if(e.target.classList.contains("gd-more")){
+      e.stopPropagation();
+      const key=e.target.dataset.key; const holder=e.target;
+      holder.textContent="読み込み中…";
+      try{
+        await ensureGeneralDict();
+        const groups=GENERAL_DICT.filter(g=>g.includes(key));
+        const words=[...new Set(groups.flat())].filter(w=>w!==key).slice(0,14);
+        if(!words.length){ holder.textContent="📚 汎用辞書には見出しがありませんでした"; return; }
+        const div=document.createElement("div");
+        div.className="chips";
+        div.innerHTML=words.map(w=>`<span class="chip" data-copy="${esc(w)}">${esc(w)}</span>`).join("");
+        holder.parentNode.insertBefore(div,holder);
+        holder.remove();
+      }catch(_){ holder.textContent="📚 汎用辞書の読み込みに失敗しました"; }
+    }
+  });
+}
+
+/* 汎用辞書（Sudachi synonyms・Apache 2.0）の遅延読み込み */
+let gdictPromise=null;
+function ensureGeneralDict(){
+  if(typeof GENERAL_DICT!=="undefined") return Promise.resolve();
+  if(gdictPromise) return gdictPromise;
+  gdictPromise=new Promise((res,rej)=>{
+    const s=document.createElement("script");
+    s.src="general_dict.js";
+    s.onload=()=>res(); s.onerror=()=>rej(new Error("load fail"));
+    document.head.appendChild(s);
+  });
+  return gdictPromise;
+}
+
+function renderEnds(ends){
+  const legend=$("endLegend"), bar=$("endBar"), runsEl=$("endRuns");
+  legend.innerHTML=END_CLASSES.filter(c=>ends.dist[c.cls]).map(c=>
+    `<span><i style="background:${c.color}"></i>${c.label}（${ends.dist[c.cls]}文）</span>`).join("");
+  bar.innerHTML=ends.seq.map(x=>{
+    const c=END_CLASSES.find(e=>e.cls===x.cls);
+    return `<div style="flex:1;background:${c?c.color:'#ccc'}" title="${esc(x.s.slice(0,20))}"></div>`;
+  }).join("");
+  if(!ends.runs.length){
+    runsEl.innerHTML='<p class="empty">同じ語尾の3連続以上はありませんでした 🎉</p>';
+  } else {
+    runsEl.innerHTML=ends.runs.map(r=>
+      `<div class="run-item">「〜${esc(r.cls)}」が <b>${r.len}文連続</b><br><span class="quote">${esc(r.preview)}…</span></div>`).join("")
+      +`<div class="advice">💡 語尾が続くときの手：①体言止めを挟む ②現在形と過去形を混ぜる ③倒置にする ④会話や擬音で一度切る</div>`;
+  }
+}
+
+function renderNgrams(ngrams){
+  const el=$("ngramList");
+  if(!ngrams.length){ el.innerHTML='<p class="empty">目立つ繰り返しフレーズはありませんでした 🎉</p>'; return; }
+  el.innerHTML=ngrams.map(n=>`<div class="ngram-item"><span>${esc(n.s)}</span><span class="freq-count mid" style="margin-left:auto">${n.c}回</span></div>`).join("")
+   +`<div class="advice">💡 キャラ名や固有名詞はそのままでOK。癖になっている言い回しだけ見直してください。</div>`;
+}
+
+/* タブ切り替え */
+document.querySelectorAll(".tabbtn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".tabview").forEach(v=>v.style.display="none");
+    $(btn.dataset.tab).style.display="block";
+  });
+});
+
+/* 単語検索（手作り辞書＋汎用辞書） */
+function rowHTML(label, words, isGeneral){
+  return `<div class="dict-row"><b>${esc(label)}</b>${isGeneral?'<span class="gd-label">汎用辞書</span>':''} → ${words.map(a=>`<span class="chip" data-copy="${esc(a)}" style="font-size:12px;padding:3px 10px;">${esc(a)}</span>`).join(" ")}</div>`;
+}
+let searchTimer=null;
+async function searchWord(q){
+  const el=$("dictList");
+  if(!q){ el.innerHTML=DICT.slice(0,8).map(d=>rowHTML(d.key,d.alts,false)).join(""); return; }
+  const curated=DICT.filter(d=>d.key.includes(q)||d.alts.some(a=>a.includes(q)));
+  let html=curated.map(d=>rowHTML(d.key,d.alts.filter(a=>a!==q),false)).join("");
+  el.innerHTML=html+`<p class="empty" id="gdStatus">📚 汎用辞書を検索中…</p>`;
+  try{
+    await ensureGeneralDict();
+    const exact=GENERAL_DICT.filter(g=>g.includes(q));
+    const partial=exact.length?[]:GENERAL_DICT.filter(g=>g.some(w=>w.includes(q))).slice(0,8);
+    const groups=(exact.length?exact:partial).slice(0,8);
+    const gHtml=groups.map(g=>{
+      const head=g.includes(q)?q:g[0];
+      const words=g.filter(w=>w!==head);
+      return rowHTML(head,words,true);
+    }).join("");
+    const status=$("gdStatus");
+    if(status) status.outerHTML = gHtml || (curated.length?'':'<p class="empty">見つかりませんでした。<a class="extlink" href="https://renso-ruigo.com/word/'+encodeURIComponent(q)+'" target="_blank">連想類語辞典で探す→</a></p>');
+  }catch(_){
+    const status=$("gdStatus");
+    if(status) status.textContent="📚 汎用辞書の読み込みに失敗しました（general_dict.jsが同じフォルダに必要です）";
+  }
+}
+$("dictSearch").addEventListener("input",e=>{
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>searchWord(e.target.value.trim()),250);
+});
+$("dictList").addEventListener("click",e=>{ if(e.target.dataset&&e.target.dataset.copy) copy(e.target.dataset.copy); });
+searchWord("");
+
+function copy(t){
+  const ta=document.createElement("textarea"); ta.value=t; document.body.appendChild(ta);
+  ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+  toast(`「${t}」をコピーしました`);
+}
+let toastTimer;
+function toast(msg){
+  const el=$("toast"); el.textContent=msg; el.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove("show"),1600);
+}
+</script>
+</body>
+</html>
