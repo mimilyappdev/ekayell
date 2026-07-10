@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ekayell!（イーカエール）｜同じ表現を見つけて、言い換える</title>
-<meta name="description" content="小説の原稿を貼るだけで、頻出表現・語尾の連続・繰り返しフレーズを検出して言い換え候補を提案。登録不要・無料・原稿はどこにも送信されません。">
+<title>Ekayell!（イーカエール）｜小説のための言い換え・感情表現辞典</title>
+<meta name="description" content="単語を入れると小説で使える言い換えが出てくる辞典。感情表現辞典（32カテゴリ・ことば/からだ/しぐさ）＋創作向け辞書＋汎用辞書7万語。登録不要・無料。">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root { --green:#3d8b5f; --green-dark:#2d6847; --green-pale:#e8f4ec; --ink:#2b3230; --muted:#6b7a72; --bg:#f4f8f5; --card:#ffffff; --accent:#e8734a; }
@@ -78,7 +78,7 @@
 <div class="wrap">
 <header>
   <h1>Ekayell!</h1>
-  <p class="tag">「同じ表現ばっかり…」を見つけて、言い換える。小説原稿の表現チェック＆言い換えツール</p>
+  <p class="tag">単語を入れると、小説で使える言い換えが出てくる。創作のための言い換え・感情表現辞典</p>
 </header>
 
 <div class="pipeline">
@@ -91,11 +91,6 @@
 </div>
 
 <p class="privacy">🔒 入力した単語も原稿もブラウザの中だけで処理されます。どこにも送信・保存されません。</p>
-
-<div class="tabs">
-  <button class="tabbtn active" data-tab="tab-word">🔍 単語をしらべる</button>
-  <button class="tabbtn" data-tab="tab-doc">📄 原稿まるごとチェック</button>
-</div>
 
 <div id="tab-word" class="tabview">
   <div class="panel">
@@ -635,7 +630,8 @@ $("dictSearch").addEventListener("input",e=>{
   searchTimer=setTimeout(()=>searchWord(e.target.value.trim()),250);
 });
 $("dictList").addEventListener("click",e=>{ if(e.target.dataset&&e.target.dataset.copy) copy(e.target.dataset.copy); });
-searchWord("");
+const initQ=new URLSearchParams(location.search).get("q");
+if(initQ){ $("dictSearch").value=initQ; searchWord(initQ); } else { searchWord(""); }
 
 function copy(t){
   const ta=document.createElement("textarea"); ta.value=t; document.body.appendChild(ta);
