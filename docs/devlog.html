@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ekayell! 開発ログ</title>
+<style>
+  body { font-family:"Yu Gothic UI","Hiragino Sans",sans-serif; background:#f4f8f5; color:#2b3230; max-width:760px; margin:0 auto; padding:24px 16px; line-height:1.8; }
+  h1 { font-size:20px; color:#2d6847; }
+  .entry { background:#fff; border-radius:12px; padding:18px 20px; margin:16px 0; box-shadow:0 1px 4px rgba(45,104,71,.08); }
+  .entry h2 { font-size:16px; color:#2d6847; margin-bottom:4px; }
+  .date { font-size:12px; color:#6b7a72; margin-bottom:10px; }
+  .item { padding:4px 0 4px 1.2em; text-indent:-1.2em; font-size:14px; }
+  .item::before { content:"✅ "; }
+  .item.warn::before { content:"⚠ "; }
+  .item.todo::before { content:"📝 "; }
+  h3 { font-size:13px; color:#6b7a72; margin:12px 0 4px; }
+</style>
+</head>
+<body>
+<h1>Ekayell!（イーカエール）開発ログ</h1>
+
+<div class="entry">
+  <h2>Vol.1 誕生から本番デプロイまで一晩</h2>
+  <p class="date">2026-07-11</p>
+  <h3>実装・変更</h3>
+  <div class="item">初版実装：単一HTML・ブラウザ完結・原稿非送信（KouseiEasyパターン踏襲）</div>
+  <div class="item">名称確定「Ekayell!」＝言い換える＋Eureka＋yell（読み：イーカエール）</div>
+  <div class="item">汎用辞書搭載：SudachiDict synonyms（Apache 2.0）を変換、26,036グループ・70,148語・遅延読み込み</div>
+  <div class="item">感情表現辞典：32カテゴリ・612表現。「ことば／からだ（身体反応）／しぐさ・行動」の3層構造</div>
+  <div class="item">mimilyappdev/ekayell → GitHub Pages 本番公開（https://mimilyappdev.github.io/ekayell/）</div>
+  <div class="item">?q=単語 パラメータ対応（外部ツールから検索済み状態で開ける）</div>
+  <h3>検討・却下</h3>
+  <div class="item warn">手作り辞書70項目のみ → 「少なすぎて使えない」判定。感情辞典32カテゴリで対応</div>
+  <div class="item warn">原稿貼り付けをUIの主役に → 「単語を打つ→言い換え」が本来の使い方。単語検索をデフォルトに変更</div>
+  <div class="item warn">原稿まるごとチェックの同居 → 別アプリ「クセミエ〜ル（仮）」に分離。その後、類似ツールの先行者がいると判明しデプロイ保留（コードはkusemieru/に完成状態で残存）</div>
+  <h3>残タスク</h3>
+  <div class="item todo">辞書拡充（ユーザーが執筆で詰まった語から随時追加する運用）</div>
+  <div class="item todo">起承転結ーる（Kisyotenketool）のデプロイとパイプライン接続</div>
+  <div class="item todo">告知の時期判断（7月は夏コミ・RakuNovel優先の計画あり）</div>
+</div>
+
+</body>
+</html>
