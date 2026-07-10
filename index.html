@@ -14,10 +14,11 @@
   .ek-header { display:flex; align-items:center; gap:14px; padding:0 20px; height:52px; background:var(--green); color:#fff; box-shadow:0 2px 8px rgba(61,139,95,.3); }
   .ek-logo { font-family:'Nunito',sans-serif; font-weight:900; font-size:22px; }
   .ek-logo-kana { font-size:10px; color:rgba(255,255,255,.6); font-weight:700; letter-spacing:.08em; }
-  .ek-btn-top { margin-left:auto; background:transparent; color:rgba(255,255,255,.9); border:1.5px solid rgba(255,255,255,.5); border-radius:6px; padding:4px 12px; font-size:11px; font-weight:700; text-decoration:none; white-space:nowrap; transition:.15s; }
+  .ek-btn-top-wrap { margin-left:auto; display:flex; gap:8px; }
+  .ek-btn-top { background:transparent; color:rgba(255,255,255,.9); border:1.5px solid rgba(255,255,255,.5); border-radius:6px; padding:4px 12px; font-size:11px; font-weight:700; text-decoration:none; white-space:nowrap; transition:.15s; }
   .ek-btn-top:hover { background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.85); }
   .subtitle { text-align:center; color:var(--muted); font-size:13px; margin:18px 0 4px; }
-  @media (max-width:520px){ .ek-header{padding:0 12px;} .ek-logo{font-size:18px;} }
+  @media (max-width:520px){ .ek-header{padding:10px 12px;height:auto;flex-wrap:wrap;} .ek-logo{font-size:18px;} .ek-btn-top-wrap{margin-left:0;width:100%;} .ek-btn-top{flex:1;text-align:center;padding:5px 6px;} }
   .pipeline { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; align-items:center; margin:16px 0 8px; font-size:11px; color:var(--muted); }
   .pipeline span, .pipeline a { padding:4px 10px; border-radius:14px; background:#eceff0; color:#8a938e; text-decoration:none; white-space:nowrap; }
   .pipeline a { background:var(--green-pale); color:var(--green-dark); font-weight:bold; }
@@ -83,7 +84,11 @@
     <span class="ek-logo">Ekayell!</span>
     <span class="ek-logo-kana">イーカエール</span>
   </div>
-  <a href="https://mimilyappdev.github.io/kouseieasy/" target="_blank" class="ek-btn-top">KouseiEasy ↗</a>
+  <div class="ek-btn-top-wrap">
+    <a href="https://mimilyappdev.github.io/kisyotenketool/" target="_blank" class="ek-btn-top">起承転結ーる ↗</a>
+    <a href="https://mimilyappdev.github.io/kouseieasy/" target="_blank" class="ek-btn-top">KouseiEasy ↗</a>
+    <a href="https://mimilyappdev.github.io/rakunovel/" target="_blank" class="ek-btn-top">RakuNovel ↗</a>
+  </div>
 </header>
 
 <div class="wrap">
@@ -91,7 +96,7 @@
 
 <div class="pipeline">
   <span>💡 アイデア</span><span class="arrow">→</span>
-  <span id="pl-kishotenketsu">起承転結ーる</span><span class="arrow">→</span>
+  <a href="https://mimilyappdev.github.io/kisyotenketool/" target="_blank">起承転結ーる</a><span class="arrow">→</span>
   <span>✍️ 執筆</span><span class="arrow">→</span>
   <span class="here">Ekayell!</span><span class="arrow">→</span>
   <a href="https://mimilyappdev.github.io/kouseieasy/" target="_blank">KouseiEasy</a><span class="arrow">→</span>
