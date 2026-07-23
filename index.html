@@ -72,6 +72,11 @@
   .tabbtn { flex:1; border:2px solid #d5e5da; background:#fff; color:var(--muted); border-radius:12px; padding:12px 8px; font-size:14px; font-weight:bold; cursor:pointer; font-family:inherit; }
   .tabbtn.active { background:var(--green); border-color:var(--green); color:#fff; }
   .gd-label { font-size:11px; color:var(--muted); background:#eef2ef; border-radius:10px; padding:2px 8px; margin-left:6px; }
+  .support-card { background:#fffaf4; border:1px solid #f0d8c8; border-radius:12px; padding:14px 16px; margin-top:14px; text-align:center; }
+  .support-card strong { display:block; color:var(--green-dark); font-size:14px; margin-bottom:4px; }
+  .support-card p { color:var(--muted); font-size:12px; margin-bottom:10px; }
+  .support-link { display:inline-block; background:var(--accent); color:#fff; border-radius:9px; padding:8px 16px; font-size:13px; font-weight:bold; text-decoration:none; }
+  .support-link:hover { filter:brightness(.96); }
   .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 24px; border-radius:24px; font-size:13px; opacity:0; transition:opacity .25s; pointer-events:none; }
   .toast.show { opacity:1; }
   #results { display:none; }
@@ -112,6 +117,11 @@
     <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">感情表現辞典（32カテゴリ）＋創作向け手作り辞書＋汎用辞書（約7万語・初回検索時に読み込み）から探します。候補タップでコピー。</p>
     <div class="chips" id="emoCats" style="margin-bottom:10px;"></div>
     <div id="dictList"></div>
+    <aside class="support-card" aria-label="Ekayellの開発応援">
+      <strong>Ekayell! は無料で使えます</strong>
+      <p>役に立ったら、次の辞書追加をちょっと応援してもらえるとうれしいです。お礼に、便利メモ付き壁紙をご用意しています。</p>
+      <a class="support-link" href="https://mimily7.booth.pm/items/8551983" target="_blank" rel="noopener noreferrer">開発を応援する・330円 ↗</a>
+    </aside>
   </div>
 </div>
 
