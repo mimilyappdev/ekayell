@@ -25,8 +25,11 @@
   .ek-btn-top-wrap { margin-left:auto; display:flex; gap:8px; }
   .ek-btn-top { background:transparent; color:rgba(255,255,255,.9); border:1.5px solid rgba(255,255,255,.5); border-radius:6px; padding:4px 12px; font-size:11px; font-weight:700; text-decoration:none; white-space:nowrap; transition:.15s; }
   .ek-btn-top:hover { background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.85); }
+  .ek-btn-top-local { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .ek-btn-top-local:hover { background:var(--accent); border-color:var(--accent); filter:brightness(.96); }
+  .ek-btn-top-local-mobile { display:none; }
   .subtitle { text-align:center; color:var(--muted); font-size:13px; margin:18px 0 4px; }
-  @media (max-width:520px){ .ek-header{padding:10px 12px;height:auto;flex-wrap:wrap;} .ek-logo{font-size:18px;} .ek-btn-top-wrap{margin-left:0;width:100%;} .ek-btn-top{flex:1;text-align:center;padding:5px 6px;} }
+  @media (max-width:520px){ .ek-header{padding:10px 12px;height:auto;flex-wrap:wrap;} .ek-logo{font-size:18px;} .ek-btn-top-wrap{margin-left:0;width:100%;flex-wrap:wrap;} .ek-btn-top{flex:1 1 calc(50% - 4px);text-align:center;padding:5px 6px;} .ek-btn-top-local-desktop{display:none;} .ek-btn-top-local-mobile{display:inline;} }
   .pipeline { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; align-items:center; margin:16px 0 8px; font-size:11px; color:var(--muted); }
   .pipeline span, .pipeline a { padding:4px 10px; border-radius:14px; background:#eceff0; color:#8a938e; text-decoration:none; white-space:nowrap; }
   .pipeline a { background:var(--green-pale); color:var(--green-dark); font-weight:bold; }
@@ -103,6 +106,7 @@
     <span class="ek-logo-kana">イーカエール</span>
   </div>
   <div class="ek-btn-top-wrap">
+    <a href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer" class="ek-btn-top ek-btn-top-local js-local-edition-link"><span class="ek-btn-top-local-desktop">機能＆言語追加 EkaYell買い切り版 ↗</span><span class="ek-btn-top-local-mobile">EkaYell 買い切り版 ↗</span></a>
     <a href="https://mimilyappdev.github.io/kisyotenketool/" target="_blank" class="ek-btn-top">起承転結ーる ↗</a>
     <a href="https://mimilyappdev.github.io/kouseieasy/" target="_blank" class="ek-btn-top">KouseiEasy ↗</a>
     <a href="https://mimilyappdev.github.io/rakunovel/" target="_blank" class="ek-btn-top">RakuNovel ↗</a>
@@ -143,7 +147,7 @@
           <ul><li>広告なし・オフライン対応</li><li>お気に入り・検索履歴</li><li>自分辞書・限定形容詞辞典</li></ul>
         </div>
       </div>
-      <div class="support-actions"><a class="support-link" id="localEditionLink" href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer">ローカル版の詳細を見る・980円 ↗</a></div>
+      <div class="support-actions"><a class="support-link js-local-edition-link" id="localEditionLink" href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer">ローカル版の詳細を見る・980円 ↗</a></div>
     </aside>
   </div>
 </div>
@@ -698,14 +702,16 @@ function toast(msg){
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove("show"),1600);
 }
 
-$("localEditionLink").addEventListener("click",()=>{
-  if(typeof gtag==="function"){
-    gtag("event","cta_click",{
-      site_id:"ekayell",
-      cta_name:"ekayell_local_booth",
-      link_destination:"booth"
-    });
-  }
+document.querySelectorAll(".js-local-edition-link").forEach(link=>{
+  link.addEventListener("click",()=>{
+    if(typeof gtag==="function"){
+      gtag("event","cta_click",{
+        site_id:"ekayell",
+        cta_name:"ekayell_local_booth",
+        link_destination:"booth"
+      });
+    }
+  });
 });
 </script>
 </body>
