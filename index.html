@@ -94,8 +94,14 @@
   .support-actions { text-align:center; }
   .support-link { display:inline-block; background:var(--accent); color:#fff; border-radius:9px; padding:8px 16px; font-size:13px; font-weight:bold; text-decoration:none; }
   .support-link:hover { filter:brightness(.96); }
-  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 24px; border-radius:24px; font-size:13px; opacity:0; transition:opacity .25s; pointer-events:none; }
+  .local-nudge { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); width:min(560px,calc(100% - 24px)); display:none; align-items:center; gap:10px; background:#fffaf4; border:1px solid #f0d8c8; border-radius:12px; padding:10px 12px; font-size:12px; box-shadow:0 4px 16px rgba(0,0,0,.15); }
+  .local-nudge.show { display:flex; }
+  .local-nudge span { flex:1; }
+  .local-nudge .support-link { padding:6px 12px; font-size:12px; white-space:nowrap; }
+  .local-nudge-close { background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer; padding:4px; }
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 24px; border-radius:24px; font-size:13px; opacity:0; transition:opacity .25s; pointer-events:none; z-index:10; }
   .toast.show { opacity:1; }
+  .local-nudge.show ~ .toast { bottom:120px; }
   #results { display:none; }
   @media (max-width:520px){ header h1{font-size:21px;} .btn-main{width:100%;} .edition-compare{grid-template-columns:1fr;} }
 </style>
@@ -107,7 +113,7 @@
     <span class="ek-logo-kana">イーカエール</span>
   </div>
   <div class="ek-btn-top-wrap">
-    <a href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer" class="ek-btn-top ek-btn-top-local js-local-edition-link"><span class="ek-btn-top-local-desktop">機能＆言語追加 EkaYell買い切り版 ↗</span><span class="ek-btn-top-local-mobile">EkaYell 買い切り版 ↗</span></a>
+    <a href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer" class="ek-btn-top ek-btn-top-local js-local-edition-link" data-cta-placement="header"><span class="ek-btn-top-local-desktop">機能＆言語追加 EkaYell買い切り版 ↗</span><span class="ek-btn-top-local-mobile">EkaYell 買い切り版 ↗</span></a>
     <a href="https://mimilyappdev.github.io/kisyotenketool/" target="_blank" class="ek-btn-top">起承転結ーる ↗</a>
     <a href="https://mimilyappdev.github.io/kouseieasy/" target="_blank" class="ek-btn-top">KouseiEasy ↗</a>
     <a href="https://mimilyappdev.github.io/rakunovel/" target="_blank" class="ek-btn-top">RakuNovel ↗</a>
@@ -137,7 +143,7 @@
     <div id="dictList"></div>
     <aside class="support-card" aria-label="Ekayell無料版とローカル版の比較">
       <strong>使い方に合わせて選べます</strong>
-      <p>この無料版はそのまま使えます。集中して書きたい方には、広告なし・オフライン対応のローカル版もあります。</p>
+      <p>この無料版はそのまま使えます。集中して書きたい方には、オフライン対応のローカル版もあります。</p>
       <div class="edition-compare">
         <div class="edition-card">
           <strong>無料Web版</strong>
@@ -145,10 +151,10 @@
         </div>
         <div class="edition-card">
           <strong>Ekayell Local</strong>
-          <ul><li>広告なし・オフライン対応</li><li>お気に入り・検索履歴</li><li>自分辞書・限定形容詞辞典</li></ul>
+          <ul><li>オフライン対応</li><li>お気に入り・検索履歴</li><li>自分辞書・限定形容詞辞典</li></ul>
         </div>
       </div>
-      <div class="support-actions"><a class="support-link js-local-edition-link" id="localEditionLink" href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer">ローカル版の詳細を見る・980円 ↗</a></div>
+      <div class="support-actions"><a class="support-link js-local-edition-link" id="localEditionLink" data-cta-placement="compare_card" href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer">ローカル版の詳細を見る・980円 ↗</a></div>
     </aside>
   </div>
 </div>
@@ -202,6 +208,11 @@
     <p style="font-size:0.75rem;color:#bbb">© 2026 Mimily / アイウィル</p>
   </div>
 </footer>
+<aside class="local-nudge" id="localNudge" aria-label="Ekayell Localの案内">
+  <span>よく使う言葉は、ローカル版ならお気に入りや自分辞書に残せます。</span>
+  <a class="support-link js-local-edition-link" data-cta-placement="copy_nudge" href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer">詳細を見る・980円 ↗</a>
+  <button class="local-nudge-close" id="localNudgeClose" type="button" aria-label="閉じる">×</button>
+</aside>
 <div class="toast" id="toast">コピーしました</div>
 
 <script id="core">
@@ -697,7 +708,27 @@ function copy(t){
   const ta=document.createElement("textarea"); ta.value=t; document.body.appendChild(ta);
   ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
   toast(`「${t}」をコピーしました`);
+  countCopyForNudge();
 }
+const NUDGE_AFTER_COPIES=3;
+let copyCount=0;
+function nudgeSeen(){
+  try{ return sessionStorage.getItem("ekLocalNudgeSeen")==="1"; }catch(_){ return false; }
+}
+function countCopyForNudge(){
+  copyCount++;
+  if(copyCount!==NUDGE_AFTER_COPIES||nudgeSeen()) return;
+  try{ sessionStorage.setItem("ekLocalNudgeSeen","1"); }catch(_){}
+  $("localNudge").classList.add("show");
+  if(typeof gtag==="function"){
+    gtag("event","cta_view",{
+      site_id:"ekayell",
+      cta_name:"ekayell_local_booth",
+      cta_placement:"copy_nudge"
+    });
+  }
+}
+$("localNudgeClose").addEventListener("click",()=>$("localNudge").classList.remove("show"));
 let toastTimer;
 function toast(msg){
   const el=$("toast"); el.textContent=msg; el.classList.add("show");
@@ -710,6 +741,7 @@ document.querySelectorAll(".js-local-edition-link").forEach(link=>{
       gtag("event","cta_click",{
         site_id:"ekayell",
         cta_name:"ekayell_local_booth",
+        cta_placement:link.dataset.ctaPlacement,
         link_destination:"booth"
       });
     }
