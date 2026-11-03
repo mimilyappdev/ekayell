@@ -63,6 +63,8 @@
   .chip { background:#fff; border:1.5px solid var(--green); color:var(--green-dark); border-radius:16px; padding:5px 14px; font-size:13px; cursor:pointer; user-select:none; }
   .chip:active { background:var(--green); color:#fff; }
   .chip-hint { font-size:11px; color:var(--muted); }
+  .chip-locked { border-style:dashed; }
+  .preview-more { font-size:12px; color:var(--muted); margin:8px 0 6px; }
   .occur { font-size:12px; color:var(--muted); line-height:2; margin-top:6px; border-top:1px dashed #d5e5da; padding-top:6px; }
   .occur mark { background:#ffe3a3; border-radius:3px; padding:0 2px; }
   .extlink { font-size:12px; margin-top:6px; display:inline-block; color:var(--green-dark); }
@@ -113,7 +115,7 @@
     <span class="ek-logo-kana">イーカエール</span>
   </div>
   <div class="ek-btn-top-wrap">
-    <a href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer" class="ek-btn-top ek-btn-top-local js-local-edition-link" data-cta-placement="header"><span class="ek-btn-top-local-desktop">機能＆言語追加 EkaYell買い切り版 ↗</span><span class="ek-btn-top-local-mobile">EkaYell 買い切り版 ↗</span></a>
+    <a href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer" class="ek-btn-top ek-btn-top-local js-local-edition-link" data-cta-placement="header"><span class="ek-btn-top-local-desktop">機能＆語彙追加 EkaYell買い切り版 ↗</span><span class="ek-btn-top-local-mobile">EkaYell 買い切り版 ↗</span></a>
     <a href="https://mimilyappdev.github.io/kisyotenketool/" target="_blank" class="ek-btn-top">起承転結ーる ↗</a>
     <a href="https://mimilyappdev.github.io/kouseieasy/" target="_blank" class="ek-btn-top">KouseiEasy ↗</a>
     <a href="https://mimilyappdev.github.io/rakunovel/" target="_blank" class="ek-btn-top">RakuNovel ↗</a>
@@ -140,6 +142,8 @@
     <input class="dict-search" id="dictSearch" placeholder="例：見る、とても、嬉しい、心臓…">
     <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">感情表現辞典（32カテゴリ）＋創作向け手作り辞書＋汎用辞書（約7万語・初回検索時に読み込み）から探します。候補タップでコピー。</p>
     <div class="chips" id="emoCats" style="margin-bottom:10px;"></div>
+    <p class="chip-hint">🔒 ローカル版限定の辞典（各分類2語を試し見できます）</p>
+    <div class="chips" id="lockedCats" style="margin-bottom:10px;"></div>
     <div id="dictList"></div>
     <aside class="support-card" aria-label="Ekayell無料版とローカル版の比較">
       <strong>使い方に合わせて選べます</strong>
@@ -151,7 +155,7 @@
         </div>
         <div class="edition-card">
           <strong>Ekayell Local</strong>
-          <ul><li>オフライン対応</li><li>お気に入り・検索履歴</li><li>自分辞書・限定形容詞辞典</li></ul>
+          <ul><li>オフライン対応</li><li>お気に入り・検索履歴</li><li>自分辞書</li><li>限定辞典（形容詞150語・オノマトペ100語）</li></ul>
         </div>
       </div>
       <div class="support-actions"><a class="support-link js-local-edition-link" id="localEditionLink" data-cta-placement="compare_card" href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer">ローカル版の詳細を見る・980円 ↗</a></div>
@@ -670,6 +674,46 @@ $("emoCats").addEventListener("click",e=>{
   $("dictList").scrollIntoView({behavior:"smooth",block:"nearest"});
 });
 renderEmoCats();
+/* ============ Ekayell Local限定辞典の試し見（各分類2語のみ） ============ */
+const LOCAL_PREVIEW = [
+ {dict:"形容詞辞典", name:"基本・見た目", emoji:"✨", total:50, samples:[{"key":"せわしない","alts":["慌ただしい","気忙しい","落ち着きのない","絶えず動き回る","息つく暇もない"]},{"key":"慌ただしい","alts":["忙しない","目まぐるしい","ばたばたした","余裕のない","時間に追われた"]}]},
+ {dict:"形容詞辞典", name:"人物・性格", emoji:"🙂", total:25, samples:[{"key":"賢い","alts":["聡明な","利発な","頭の切れる","明敏な","知略に長けた"]},{"key":"愚か","alts":["愚鈍な","浅はかな","分別のない","短慮な","考えの足りない"]}]},
+ {dict:"形容詞辞典", name:"状態・性質", emoji:"🔍", total:25, samples:[{"key":"強い","alts":["力強い","強靭な","屈強な","揺るぎない","圧倒的な"]},{"key":"弱い","alts":["か弱い","脆弱な","力のない","頼りない","今にも折れそうな"]}]},
+ {dict:"形容詞辞典", name:"音・感覚・味", emoji:"👂", total:20, samples:[{"key":"うるさい","alts":["喧しい","耳障りな","騒々しい","頭に響く","声を張り上げた"]},{"key":"甲高い","alts":["かん高い","金切り声の","耳をつんざく","細く高い","鋭く響く"]}]},
+ {dict:"形容詞辞典", name:"天候・情景", emoji:"🌿", total:20, samples:[{"key":"暑い","alts":["うだるような","焼けつくような","蒸し風呂のような","汗ばむ","息苦しいほどの"]},{"key":"涼しい","alts":["ひんやりした","清涼な","風通しのよい","肌に心地よい","暑さの引いた"]}]},
+ {dict:"形容詞辞典", name:"時間・量", emoji:"⏱", total:10, samples:[{"key":"忙しい","alts":["多忙な","手が離せない","目が回るような","予定の詰まった","休む暇もない"]},{"key":"眠い","alts":["眠気を誘う","まぶたの重い","うとうとした","意識が霞む","今にも寝落ちしそうな"]}]},
+ {dict:"オノマトペ辞典", name:"心の動き", emoji:"💓", total:17, samples:[{"key":"ドキッ","alts":["胸が跳ねる","心臓が一拍飛ぶ","息が止まりかける"]},{"key":"ギクッ","alts":["肩が強張る","背筋が凍る","心臓が縮み上がる"]}]},
+ {dict:"オノマトペ辞典", name:"表情・動作", emoji:"🚶", total:19, samples:[{"key":"ニコニコ","alts":["微笑む","笑みを絶やさない","顔をほころばせる"]},{"key":"ニヤニヤ","alts":["にやつく","口の端を吊り上げる","含み笑いを浮かべる"]}]},
+ {dict:"オノマトペ辞典", name:"音", emoji:"🔔", total:16, samples:[{"key":"ザーザー","alts":["雨が激しく降る","土砂降り","叩きつけるような雨"]},{"key":"ポツポツ","alts":["雨がぱらつく","雨粒が落ち始める","点々と"]}]},
+ {dict:"オノマトペ辞典", name:"光・見た目", emoji:"💡", total:16, samples:[{"key":"ピカッ","alts":["閃光が走る","一瞬光る","稲妻が閃く"]},{"key":"ギラギラ","alts":["照りつける","ぎらつく","欲望を滾らせた目"]}]},
+ {dict:"オノマトペ辞典", name:"手触り・質感", emoji:"✋", total:16, samples:[{"key":"ざらざら","alts":["ざらついた","手触りの粗い","砂を含んだような"]},{"key":"つるつる","alts":["滑らかな","摩擦のない","磨かれた"]}]},
+ {dict:"オノマトペ辞典", name:"天候・自然", emoji:"🌦", total:16, samples:[{"key":"じめじめ","alts":["湿っぽい","湿気がまとわりつく","陰湿な"]},{"key":"からっと","alts":["からりと晴れた","乾いた空気の","さっぱりした"]}]}
+];
+function previewBlockHTML(c){
+  const placement=c.dict==="オノマトペ辞典"?"ono_preview":"adj_preview";
+  return `<div class="dict-row"><b>${c.emoji} ${esc(c.name)}</b><span class="gd-label">ローカル版限定・${esc(c.dict)}</span>${c.samples.map(d=>rowHTML(d.key,d.alts,false)).join("")}
+    <p class="preview-more">🔒 この分類は全${c.total}語。続きはEkayell Local（買い切り・オフライン対応）で使えます。</p>
+    <a class="support-link js-local-edition-link" data-cta-placement="${placement}" href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer">ローカル版の詳細を見る・980円 ↗</a></div>`;
+}
+function renderLockedCats(){
+  $("lockedCats").innerHTML=LOCAL_PREVIEW.map((c,i)=>`<span class="chip chip-locked" data-preview="${i}" style="font-size:12px;padding:4px 10px;">🔒${c.emoji}${esc(c.name)}</span>`).join("");
+}
+$("lockedCats").addEventListener("click",e=>{
+  const i=e.target.dataset&&e.target.dataset.preview;
+  if(i===undefined||i===null||i==="")return;
+  const c=LOCAL_PREVIEW[+i];
+  $("dictSearch").value="";
+  $("dictList").innerHTML=previewBlockHTML(c);
+  $("dictList").scrollIntoView({behavior:"smooth",block:"nearest"});
+  if(typeof gtag==="function"){
+    gtag("event","cta_view",{
+      site_id:"ekayell",
+      cta_name:"ekayell_local_booth",
+      cta_placement:c.dict==="オノマトペ辞典"?"ono_preview":"adj_preview"
+    });
+  }
+});
+renderLockedCats();
 
 let searchTimer=null;
 async function searchWord(q){
@@ -735,8 +779,10 @@ function toast(msg){
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove("show"),1600);
 }
 
-document.querySelectorAll(".js-local-edition-link").forEach(link=>{
-  link.addEventListener("click",()=>{
+/* 試し見の案内リンクは後から描画されるため、クリックはまとめて拾う */
+document.addEventListener("click",e=>{
+  const link=e.target.closest&&e.target.closest(".js-local-edition-link");
+  if(link){
     if(typeof gtag==="function"){
       gtag("event","cta_click",{
         site_id:"ekayell",
@@ -745,7 +791,7 @@ document.querySelectorAll(".js-local-edition-link").forEach(link=>{
         link_destination:"booth"
       });
     }
-  });
+  }
 });
 </script>
 </body>
