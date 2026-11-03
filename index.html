@@ -36,6 +36,11 @@
   .pipeline a { background:var(--green-pale); color:var(--green-dark); font-weight:bold; }
   .pipeline .here { background:var(--green); color:#fff; font-weight:bold; }
   .pipeline .arrow { background:none; padding:0 2px; }
+  .local-banner { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#fffaf4; border:1px solid #f0d8c8; border-radius:12px; padding:12px 16px; margin:10px 0 0; }
+  .local-banner-text { flex:1 1 260px; font-size:13px; color:var(--green-dark); line-height:1.6; }
+  .local-banner-text b { color:var(--accent); }
+  .local-banner-new { display:inline-block; background:var(--accent); color:#fff; font-size:11px; font-weight:bold; border-radius:8px; padding:1px 8px; margin-right:6px; }
+  .local-banner .support-link { white-space:nowrap; }
   .privacy { text-align:center; font-size:12px; color:var(--green-dark); background:var(--green-pale); border-radius:8px; padding:8px 12px; margin:10px 0 20px; }
   .panel { background:var(--card); border-radius:14px; padding:18px; box-shadow:0 2px 8px rgba(45,104,71,.08); margin-bottom:18px; }
   textarea { width:100%; min-height:220px; border:2px solid #d5e5da; border-radius:10px; padding:14px; font-size:15px; line-height:1.9; font-family:inherit; resize:vertical; }
@@ -133,6 +138,11 @@
   <a href="https://mimilyappdev.github.io/kouseieasy/" target="_blank">KouseiEasy</a><span class="arrow">→</span>
   <a href="https://mimilyappdev.github.io/rakunovel/" target="_blank">RakuNovel</a>
 </div>
+
+<aside class="local-banner" aria-label="Ekayell買い切り版の案内">
+  <div class="local-banner-text"><span class="local-banner-new">NEW</span>買い切り版なら<b>限定辞典＋250語</b>（形容詞150語・オノマトペ100語）。お気に入り・履歴・オフラインにも対応。</div>
+  <a class="support-link js-local-edition-link" data-cta-placement="top_banner" href="https://booth.pm/ja/items/8360529" target="_blank" rel="noopener noreferrer">買い切り版を見る・980円 ↗</a>
+</aside>
 
 <p class="privacy">🔒 入力した単語も原稿もブラウザの中だけで処理されます。どこにも送信・保存されません。</p>
 
